@@ -127,16 +127,16 @@ const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse d
 
 ///////////////////////// sans ease ////////////////////////////////
 // function animateRotation() {
-//     if (!object || isAnimating) return; // Si l'objet n'est pas défini ou l'animation est déjà en cours, ne rien faire
+//     if (!object || isAnimating) return; // if object doesnt exist or animation is running
     
 //     isAnimating = true;
 //     let startYRotation = object.rotation.y;
 //     let startXRotation = object.rotation.x;
-//     let endYRotation = startYRotation + Math.PI * 2; // 360 degrés sur l'axe Y
-//     let endXRotation = startXRotation - Math.PI * 2; // 360 degrés sur l'axe X, dans le sens inverse
+//     let endYRotation = startYRotation + Math.PI * 2; // 360 degrés on Y axe
+//     let endXRotation = startXRotation - Math.PI * 2; // 360 degrés on X axe, (opposite)
   
 //     function rotate() {
-//       // Vérifier si l'une des animations doit continuer
+//       // Verify if rotation has to continue
 //       if (object.rotation.y < endYRotation || object.rotation.x > endXRotation) {
 //         if (object.rotation.y < endYRotation) {
 //           object.rotation.y += rotationSpeed;
@@ -144,58 +144,58 @@ const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse d
 //         if (object.rotation.x > endXRotation) {
 //           object.rotation.x -= rotationSpeed;
 //         }
-//         requestAnimationFrame(rotate); // Continuer l'animation
+//         requestAnimationFrame(rotate); // Continu animation
 //       } else {
-//         // Ajuster pour s'assurer que les rotations atteignent exactement 360 degrés
+//         // Adjust until the animation does a full 360 rotation
 //         object.rotation.y = endYRotation;
 //         object.rotation.x = endXRotation;
-//         isAnimating = false; // Réinitialiser le contrôle de l'animation
+//         isAnimating = false; // Reintialize value of isAnimating
 //       }
 //     }
   
 //     rotate();
 //   }
   
-//   // Attachez l'écouteur d'événement de clic pour déclencher l'animation
+//   // to start animate on click on triggerElement
 //   triggerElement.addEventListener('click', animateRotation);
   
 ///////////////////////// avec ease ////////////////////////////////
-// Fonction d'ease-in-out qui commence et finit lentement mais est plus rapide au milieu
+// ease-in-out animation that slow on start/end but faster on mid
 function easeInOutQuad(t) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
   
   function animateRotation() {
-    if (!object || isAnimating) return; // Ne rien faire si l'objet n'est pas défini ou si l'animation est déjà en cours
+    if (!object || isAnimating) return; // exist if object doesnt exist/ is currently animated
     
     isAnimating = true;
-    const duration = 1500; // Durée de l'animation en millisecondes
+    const duration = 1500; // animation duration ms
     const startTime = Date.now();
   
     function rotate() {
       const now = Date.now();
       const elapsedTime = now - startTime;
       let progress = elapsedTime / duration;
-      if (progress > 1) progress = 1; // S'assurer que le progrès ne dépasse pas 1
+      if (progress > 1) progress = 1; // progress should not exceed 1
   
-      // Appliquer la fonction d'ease au progrès
+      // Set ease during progression
       const easedProgress = easeInOutQuad(progress);
   
-      // Calculer et appliquer les rotations en utilisant le progrès ajusté par l'ease
+      // calculate + applicate ease depending on progression of rotation
       object.rotation.y = easedProgress * Math.PI * 2; // Rotation complète sur Y
       object.rotation.x = easedProgress * Math.PI * 2; // Rotation complète sur X, dans le même sens pour simplifier
   
       if (progress < 1) {
-        requestAnimationFrame(rotate); // Continuer l'animation
+        requestAnimationFrame(rotate); // Continue animation
       } else {
-        isAnimating = false; // Fin de l'animation
+        isAnimating = false; // End animation
       }
     }
   
     rotate();
   }
   
-  // Attachez l'écouteur d'événement de clic pour déclencher l'animation
+  // Listen click on triggerElement to start animation
   triggerElement.addEventListener('click', animateRotation);
   
 //Start the 3D rendering
