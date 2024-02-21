@@ -4,6 +4,9 @@ body {
     background-color: #000;
     color: white;
   }
+  *{
+    overflow:hidden;
+  }
   main{
     display: flex; 
     flex-direction: row; 
@@ -24,10 +27,15 @@ section{
   width: 100vw;
   height: 100vh;
 }
+.commands{
+  display: flex;
 
+  gap: 1rem;
+}
 .button {
   margin-top: 1rem;
-
+  z-index: 1;
+  cursor: pointer;
   align-items: center;
   appearance: none;
   background-color: #FCFCFD;
@@ -58,6 +66,7 @@ section{
   font-size: 18px;
 }
 
+
 .button:focus {
   box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
 }
@@ -83,11 +92,7 @@ section{
     top: 0;
     left: 0;
   }
-  .button{
-    position: absolute;
-    z-index: 1;
-    cursor: pointer;
-  }
+
   footer{
     width: 100%;
     position: absolute;
@@ -110,3 +115,22 @@ section{
   a:hover{
     color: rgb(216, 216, 216);
   }
+  .scrollUpButton, .scrollDownButton{
+    display: none;
+  }
+  @media screen and (max-width: 1024px){
+    main{
+        flex-direction: column;
+    }
+    .conteneur-flex{
+        flex-flow: column wrap;
+    }
+    *{
+      overflow:inherit;
+    }
+    /* button */
+    .scrollUpButton, .scrollDownButton{
+      display: inherit;
+    }
+}
+

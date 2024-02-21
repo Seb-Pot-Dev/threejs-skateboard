@@ -7,33 +7,43 @@
   </head>
   <body>
     <main>
-      <section id="skate-1">
-        <button class="button" id="trigger-skate-1">
-          do a 360-flip!
-        </button>
-        
-        <div class="container3D" id="container3D"></div>
-      </section>
-      
       <section id="skate-2">
-        <button class="button" id="trigger-skate-2">
-          do a Kickflip!
-        </button>
-        
+        <div class="commands">
+          <button class="button" id="trigger-skate-2">
+            do a Kickflip!
+          </button>
+          <button class="button scrollDownButton">Next tricks !</button>
+        </div>
         <div class="container3D" id="container3D-2"></div>
       </section>
+
+      <section id="skate-1">
+        <div class="commands">
+          <button class="button" id="trigger-skate-1">
+            do a 360-flip!
+          </button>
+          <button class="button scrollUpButton">Previous tricks !</button>
+        </div>
+          <div class="container3D" id="container3D"></div>
+      </section>
+      
+      
     </main>
 
-        <footer>
-          <p>
-            Website and animation by <a href="https://github.com/seb-pot-dev">Sébastien POTHEE. </a> 
-          </p>
-          <p>
-            <a href="https://sketchfab.com/3d-models/skateboard-bcda2cf96cc6433ebd36c9eaed629588">3D model </a>by <a href="https://sketchfab.com/James.Harness">James Harness.</a>
-             
-          </p>
-        </footer>
+    <div>
+
+      <footer>
+        <p>
+          Website and animation by <a href="https://github.com/seb-pot-dev">Sébastien POTHEE. </a> 
+        </p>
+        <p>
+          <a href="https://sketchfab.com/3d-models/skateboard-bcda2cf96cc6433ebd36c9eaed629588">3D model </a>by <a href="https://sketchfab.com/James.Harness">James Harness.</a>
+          
+        </p>
+      </footer>
+    </div>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/main-2.js"></script>
+    <script type="module" src="js/scroll.js"></script>
   </body>
 </html>
