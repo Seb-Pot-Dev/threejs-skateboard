@@ -136,7 +136,14 @@ function easeInOutQuad(t) {
 // Attachez l'écouteur d'événement de clic pour déclencher l'animation
 triggerElement.addEventListener('click', animateRotation);
 
+//Empeche le resize window d'affecter le ratio aspect du modele 3d
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
+window.addEventListener('resize', onWindowResize, false);
 
 //Start the 3D rendering
 animate();
