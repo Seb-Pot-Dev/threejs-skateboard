@@ -1,3 +1,6 @@
+// Ce script permet de scroll 100vh vers le haut ou vers le bas
+
+
 // Supposons que 'scrollButton' est la classe de votre bouton
 var scrollDownButtons = document.getElementsByClassName('scrollDownButton');
 

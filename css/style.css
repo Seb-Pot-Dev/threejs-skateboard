@@ -121,19 +121,5 @@ section{
   .scrollUpButton, .scrollDownButton{
     display: none;
   }
-  @media screen and (max-width: 1024px){
-    main{
-        flex-direction: column;
-    }
-    .conteneur-flex{
-        flex-flow: column wrap;
-    }
-    *{
-      overflow:inherit;
-    }
-    /* button */
-    .scrollUpButton, .scrollDownButton{
-      display: inherit;
-    }
-}
+
 

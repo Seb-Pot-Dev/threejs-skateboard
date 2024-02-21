@@ -72,7 +72,9 @@ function animate() {
 
 
 // Sélectionner l'élément déclencheur
-const triggerElement = document.getElementById('trigger-skate-1');
+const triggerElement360flip = document.getElementById('triggerElement360flip');
+// Sélectionner l'élément déclencheur
+const triggerElementKickflip = document.getElementById('triggerElementKickflip');
 
 // Fonction pour démarrer l'animation de rotation
 let isAnimating = false;
@@ -97,7 +99,7 @@ loader.load(`models/${objToRender}/scene.gltf`, function (gltf) {
   // D'autres configurations du modèle peuvent aller ici
 });
 
-function animateRotation() {
+function animateRotation360flip() {
   if (isAnimating) return; // Si une animation est déjà en cours, ne rien faire
   
   isAnimating = true;
@@ -133,8 +135,7 @@ function easeInOutQuad(t) {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-// Attachez l'écouteur d'événement de clic pour déclencher l'animation
-triggerElement.addEventListener('click', animateRotation);
+
 
 //Empeche le resize window d'affecter le ratio aspect du modele 3d
 function onWindowResize() {
@@ -145,6 +146,41 @@ function onWindowResize() {
 
 window.addEventListener('resize', onWindowResize, false);
 
+function animateRotationKickflip() {
+  if (isAnimating) return; // Si une animation est déjà en cours, ne rien faire
+  
+  isAnimating = true;
+  const duration = 1000; // Durée de l'animation en millisecondes
+  const startTime = Date.now();
+
+  function rotate() {
+    const now = Date.now();
+    const elapsedTime = now - startTime;
+    let progress = elapsedTime / duration;
+    if (progress > 1) progress = 1;
+
+    const easedProgress = easeInOutQuad(progress);
+
+    // Appliquer le kickflip au modèle (rotation autour de l'axe X)
+    object.rotation.x = (easedProgress * Math.PI * 2);
+
+    // // Appliquer le 360 shove-it au conteneur (rotation autour de l'axe Y)
+    // container.rotation.y = (easedProgress * Math.PI * 2);
+
+    if (progress < 1) {
+      requestAnimationFrame(rotate);
+    } else {
+      isAnimating = false; // Réinitialiser l'état d'animation à la fin
+    }
+  }
+
+  rotate();
+}
+// Attachez l'écouteur d'événement de clic pour déclencher l'animation
+triggerElement360flip.addEventListener('click', animateRotation360flip);
+
+// Attachez l'écouteur d'événement de clic pour déclencher l'animation
+triggerElementKickflip.addEventListener('click', animateRotationKickflip);
 //Start the 3D rendering
 animate();
 
