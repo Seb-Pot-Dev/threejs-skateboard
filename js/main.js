@@ -8,7 +8,7 @@ import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/l
 //Create a Three.JS Scene
 const scene = new THREE.Scene();
 //create a new camera with positions and angles
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 //Keep track of the mouse position, so we can make the skateboard-1 move
 let mouseX = window.innerWidth / 2;
@@ -16,6 +16,7 @@ let mouseY = window.innerHeight / 2;
 
 //Keep the 3D object on a global variable so we can access it later
 let object;
+
 
 //OrbitControls allow the camera to move around the scene
 let controls;
@@ -26,27 +27,10 @@ let objToRender = 'skateboard-1';
 //Instantiate a loader for the .gltf file
 const loader = new GLTFLoader();
 
-//Load the file
-loader.load(
-  `models/${objToRender}/scene.gltf`,
-  function (gltf) {
-    //If the file is loaded, add it to the scene
-    object = gltf.scene;
-    scene.add(object);
-  },
-  function (xhr) {
-    //While it is loading, log the progress
-    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-  },
-  function (error) {
-    //If there is an error, log it
-    console.error(error);
-  }
-);
-
+// 
 //Instantiate a new renderer and set its size
 const renderer = new THREE.WebGLRenderer({ alpha: true }); //Alpha: true allows for the transparent background
-renderer.setSize(window.innerWidth*4, window.innerHeight*4);
+renderer.setSize(window.innerWidth*2, window.innerHeight*2);
 
 //Add the renderer to the DOM
 document.getElementById("container3D").appendChild(renderer.domElement);
@@ -66,7 +50,7 @@ scene.add(ambientLight);
 //This adds controls to the camera, so we can rotate / zoom it with the mouse
 if (objToRender === "skateboard-1") {
   controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableZoom = false; // Désactiver le zoom
+  // controls.enableZoom = false; // Désactiver le zoom
 }
 
 //Render the scene
@@ -80,26 +64,100 @@ function animate() {
     // object.rotation.y = -3 + mouseX / window.innerWidth * 3;
     // object.rotation.x = -1.2 + mouseY * 2.5 / window.innerHeight;
   }
+  // object.scale.set(1, 1, 1); // Assure une mise à l'échelle uniforme
+
   renderer.render(scene, camera);
 }
 
-//Add a listener to the window, so we can resize the window and the camera
-window.addEventListener("resize", function () {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+// Sélectionner l'élément déclencheur
+const triggerElement = document.getElementById('trigger-skate-1');
+
+// Fonction pour démarrer l'animation de rotation
+let isAnimating = false;
+let startRotation = 0;
+let endRotation = 0;
+const rotationIncrement = Math.PI * 2; // 360 degrés en radians
+const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse de l'animation
+
+
+
+
+  
+///////////////////////// avec ease ////////////////////////////////
+// Création d'un conteneur pour le modèle
+let container = new THREE.Object3D();
+scene.add(container);
+
+// Après le chargement du modèle, ajoutez-le au conteneur au lieu de l'ajouter directement à la scène
+loader.load(`models/${objToRender}/scene.gltf`, function (gltf) {
+  object = gltf.scene;
+  container.add(object); // Ajoutez le modèle au conteneur
+  // D'autres configurations du modèle peuvent aller ici
 });
 
-// //add mouse position listener, so we can make the skateboard-1 move
+function animateRotation() {
+  if (isAnimating) return; // Si une animation est déjà en cours, ne rien faire
+  
+  isAnimating = true;
+  const duration = 1500; // Durée de l'animation en millisecondes
+  const startTime = Date.now();
+
+  function rotate() {
+    const now = Date.now();
+    const elapsedTime = now - startTime;
+    let progress = elapsedTime / duration;
+    if (progress > 1) progress = 1;
+
+    const easedProgress = easeInOutQuad(progress);
+
+    // Appliquer le kickflip au modèle (rotation autour de l'axe X)
+    object.rotation.x = (easedProgress * Math.PI * 2);
+
+    // Appliquer le 360 shove-it au conteneur (rotation autour de l'axe Y)
+    container.rotation.y = (easedProgress * Math.PI * 2);
+
+    if (progress < 1) {
+      requestAnimationFrame(rotate);
+    } else {
+      isAnimating = false; // Réinitialiser l'état d'animation à la fin
+    }
+  }
+
+  rotate();
+}
+
+// Fonction d'interpolation pour l'animation
+function easeInOutQuad(t) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+// Attachez l'écouteur d'événement de clic pour déclencher l'animation
+triggerElement.addEventListener('click', animateRotation);
+
+
+
+//Start the 3D rendering
+animate();
+
+// //Add a listener to the window, so we can resize the window and the camera
+// window.addEventListener("resize", function () {
+//   camera.aspect = window.innerWidth / window.innerHeight;
+//   camera.updateProjectionMatrix();
+//   renderer.setSize(window.innerWidth, window.innerHeight);
+// });
+
+// // //add mouse position listener, so we can make the skateboard-1 move
 // document.onmousemove = (e) => {
 //   mouseX = e.clientX;
 //   mouseY = e.clientY;
 // }
 
-// Initialize a variable to keep track of the total scroll height
-let totalScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+// // Initialize a variable to keep track of the total scroll height
+// let totalScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
 
-// // Add the scroll event listener
+// // // Add the scroll event listener
 // window.addEventListener('scroll', () => {
 //     // Calculate the current scroll progress as a fraction
 //     let scrollFraction = window.scrollY / totalScrollHeight;
@@ -112,17 +170,6 @@ let totalScrollHeight = document.documentElement.scrollHeight - window.innerHeig
 //         object.rotation.y = rotationY;
 //     }
 // });
-
-// Sélectionner l'élément déclencheur
-const triggerElement = document.getElementById('trigger-skate-1');
-
-// Fonction pour démarrer l'animation de rotation
-let isAnimating = false;
-let startRotation = 0;
-let endRotation = 0;
-const rotationIncrement = Math.PI * 2; // 360 degrés en radians
-const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse de l'animation
-
 
 
 ///////////////////////// sans ease ////////////////////////////////
@@ -158,45 +205,3 @@ const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse d
   
 //   // to start animate on click on triggerElement
 //   triggerElement.addEventListener('click', animateRotation);
-  
-///////////////////////// avec ease ////////////////////////////////
-// ease-in-out animation that slow on start/end but faster on mid
-function easeInOutQuad(t) {
-    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-  }
-  
-  function animateRotation() {
-    if (!object || isAnimating) return; // exist if object doesnt exist/ is currently animated
-    
-    isAnimating = true;
-    const duration = 1500; // animation duration ms
-    const startTime = Date.now();
-  
-    function rotate() {
-      const now = Date.now();
-      const elapsedTime = now - startTime;
-      let progress = elapsedTime / duration;
-      if (progress > 1) progress = 1; // progress should not exceed 1
-  
-      // Set ease during progression
-      const easedProgress = easeInOutQuad(progress);
-  
-      // calculate + applicate ease depending on progression of rotation
-      object.rotation.y = easedProgress * Math.PI * 2; // Rotation complète sur Y
-      object.rotation.x = easedProgress * Math.PI * 2; // Rotation complète sur X, dans le même sens pour simplifier
-  
-      if (progress < 1) {
-        requestAnimationFrame(rotate); // Continue animation
-      } else {
-        isAnimating = false; // End animation
-      }
-    }
-  
-    rotate();
-  }
-  
-  // Listen click on triggerElement to start animation
-  triggerElement.addEventListener('click', animateRotation);
-  
-//Start the 3D rendering
-animate();
