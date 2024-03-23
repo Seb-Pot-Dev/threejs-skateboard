@@ -10,13 +10,12 @@ const scene = new THREE.Scene();
 //create a new camera with positions and angles
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-//Keep track of the mouse position, so we can make the skateboard-1 move
-let mouseX = window.innerWidth / 2;
-let mouseY = window.innerHeight / 2;
+//Keep track of the mouse position
+// let mouseX = window.innerWidth / 2;
+// let mouseY = window.innerHeight / 2;
 
 //Keep the 3D object on a global variable so we can access it later
 let object;
-
 
 //OrbitControls allow the camera to move around the scene
 let controls;
@@ -24,10 +23,40 @@ let controls;
 //Set which object to render
 let objToRender = 'skateboard-1';
 
-//Instantiate a loader for the .gltf file
-const loader = new GLTFLoader();
 
-// 
+
+//Instantiate a new manager for the loader
+// Create a loading manager
+const manager = new THREE.LoadingManager();
+
+// Appelé quand le chargement commence
+manager.onStart = function (url, itemsLoaded, itemsTotal) {
+  console.log('Commencé à charger : ' + url + '.\nChargé ' + itemsLoaded + ' sur ' + itemsTotal + ' fichiers.');
+};
+
+// Appelé pendant que le chargement progresse
+manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+  console.log('Chargement en cours : ' + url + '.\nChargé ' + itemsLoaded + ' sur ' + itemsTotal + ' fichiers.');
+  // Mettre à jour la barre de progression
+  let percentComplete = (itemsLoaded / itemsTotal) * 100;
+  document.getElementById('loadingBar').style.width = percentComplete + '%';
+};
+
+// Appelé quand tout le chargement est terminé
+manager.onLoad = function () {
+  console.log('Chargement terminé.');
+  // Masquez votre animation de chargement ici
+  document.getElementById('loadingBarContainer').style.display = 'none';
+};
+
+// Appelé quand le chargement a des erreurs
+manager.onError = function (url) {
+  console.log('Il y avait une erreur de chargement ' + url);
+};
+
+//Instantiate a loader for the .gltf file
+const loader = new GLTFLoader(manager);
+
 //Instantiate a new renderer and set its size
 const renderer = new THREE.WebGLRenderer({ alpha: true }); //Alpha: true allows for the transparent background
 renderer.setSize(window.innerWidth*2, window.innerHeight*2);
@@ -78,10 +107,10 @@ const triggerElementKickflip = document.getElementById('triggerElementKickflip')
 
 // Fonction pour démarrer l'animation de rotation
 let isAnimating = false;
-let startRotation = 0;
-let endRotation = 0;
-const rotationIncrement = Math.PI * 2; // 360 degrés en radians
-const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse de l'animation
+// let startRotation = 0;
+// let endRotation = 0;
+// const rotationIncrement = Math.PI * 2; // 360 degrés en radians
+// const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse de l'animation
 
 
 
@@ -92,7 +121,7 @@ const rotationSpeed = 0.06; // Ajustez cette valeur pour contrôler la vitesse d
 let container = new THREE.Object3D();
 scene.add(container);
 
-// Après le chargement du modèle, ajoutez-le au conteneur au lieu de l'ajouter directement à la scène
+// Après le chargement du modèle, l'ajouter au conteneur au lieu de l'ajouter directement à la scène
 loader.load(`models/${objToRender}/scene.gltf`, function (gltf) {
   object = gltf.scene;
   container.add(object); // Ajoutez le modèle au conteneur
@@ -164,9 +193,6 @@ function animateRotationKickflip() {
     // Appliquer le kickflip au modèle (rotation autour de l'axe X)
     object.rotation.x = (easedProgress * Math.PI * 2);
 
-    // // Appliquer le 360 shove-it au conteneur (rotation autour de l'axe Y)
-    // container.rotation.y = (easedProgress * Math.PI * 2);
-
     if (progress < 1) {
       requestAnimationFrame(rotate);
     } else {
@@ -181,6 +207,7 @@ triggerElement360flip.addEventListener('click', animateRotation360flip);
 
 // Attachez l'écouteur d'événement de clic pour déclencher l'animation
 triggerElementKickflip.addEventListener('click', animateRotationKickflip);
+
 //Start the 3D rendering
 animate();
 
