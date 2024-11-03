@@ -10,6 +10,29 @@ body {
   *{
     overflow:hidden;
   }
+/* Conteneur de la barre de progression */
+#loadingBarContainer {
+    width: 80%; /* ou 100% si vous voulez qu'elle s'étende sur toute la largeur */
+    height: 30px; /* Hauteur de la barre de progression */
+    background-color: #eee; /* Couleur de fond */
+    border-radius: 15px; /* Arrondir les coins */
+    position: fixed; /* Fixer la barre en bas de la page */
+    top: 50%; /* Centrer verticalement (ajustez selon besoin) */
+    left: 50%; /* Centrer horizontalement */
+    transform: translate(-50%, -50%); /* Ajustement nécessaire pour le centrage */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Ombre pour un peu de profondeur */
+    overflow: hidden; /* Garantit que la barre intérieure ne dépasse pas */
+}
+
+/* Barre de progression elle-même */
+#loadingBar {
+    height: 100%; /* Remplir entièrement le conteneur en hauteur */
+    width: 0%; /* Largeur initiale de 0; elle sera mise à jour par JavaScript */
+    background-color: #4caf50; /* Couleur de la barre de progression */
+    transition: width 0.4s ease; /* Transition douce pour les changements de largeur */
+    border-radius: 15px; /* Assure que la barre arrondie suit les coins du conteneur */
+}
+
   main{
     display: flex; 
     flex-direction: row; 
