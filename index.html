@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <!-- <title>A simple Three.JS App</title> -->
     <link rel="stylesheet" href="css/style.css" />
+    <script type="module" src="components/ThreeModelLoader.js"></script>
   </head>
   <body>
     <main>
@@ -17,6 +18,7 @@
           </button>
           <!-- <button class="button scrollDownButton">Next tricks !</button> -->
         </div>
+        <three-model-loader></three-model-loader>
         <div class="container3D" id="container3D"></div>
       </section>
 
@@ -38,13 +40,11 @@
           Website and animation by <a href="https://github.com/seb-pot-dev">Sébastien POTHEE. </a> 
         </p>
         <p>
-          <a href="https://sketchfab.com/3d-models/skateboard-bcda2cf96cc6433ebd36c9eaed629588">3D model </a>by <a href="https://sketchfab.com/James.Harness">James Harness.</a>
+          <a href="https://sketchfab.com/3d-models/skateboard-bcda2cf96cc6433ebd36c9eaed629588">3D model</a> by <a href="https://sketchfab.com/James.Harness">James Harness.</a>
           
         </p>
       </footer>
     </div>
-    <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/main-2.js"></script>
-    <script type="module" src="js/scroll.js"></script>
+    <script type="module" src="3D/main.js"></script>
   </body>
 </html>
