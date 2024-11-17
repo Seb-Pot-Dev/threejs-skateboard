@@ -8,7 +8,7 @@ const CONFIG = {
     objToRender: 'skateboard-1',
     scale: { x: 0.5, y: 0.5, z: 0.5 }, // Nouvelle propriété pour définir l'échelle
     animationDuration: {
-        flip360: 1500,
+        flip360: 1200,
         kickflip: 750,
         popThenFlick: 1200
     },
@@ -37,6 +37,113 @@ let isAnimating = false;
 let container = new THREE.Object3D();
 let modelLoader;
 
+// Add raycaster and mouse vector
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Interactive zones and highlight boxes
+let interactiveZones = {};
+let highlightBoxes = {};
+
+// Function to define an interactive zone
+function defineInteractiveZone(zoneName, minVector, maxVector) {
+    // Create a bounding box for the specified zone
+    interactiveZones[zoneName] = new THREE.Box3(minVector, maxVector);
+}
+
+// Function to create a highlight box
+function createHighlightBox(zoneName, color) {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
+    const highlightBox = new THREE.Mesh(geometry, material);
+    highlightBox.visible = false; // Initially hidden
+    scene.add(highlightBox);
+    highlightBoxes[zoneName] = highlightBox;
+}
+
+// Function to handle mouse click
+function onDocumentMouseClick(event) {
+    event.preventDefault();
+
+    // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Update the raycaster with the camera and mouse position
+    raycaster.setFromCamera(mouse, camera);
+
+    // Calculate objects intersecting the picking ray
+    const intersects = raycaster.intersectObject(object, true);
+
+    if (intersects.length > 0) {
+        const intersectionPoint = intersects[0].point;
+
+        // Check if the intersection point is within any defined interactive zone
+        for (const [zoneName, zone] of Object.entries(interactiveZones)) {
+            if (zone.containsPoint(intersectionPoint)) {
+                // Trigger the corresponding animation based on the zone
+                if (zoneName === 'tail') {
+                    animatePopThenFlick();
+                } else if (zoneName === 'kickflip') {
+                    animateKickflip();
+                } else if (zoneName === '360flip') {
+                    animate360flip();
+                }
+                // Hide the highlight box after clicking
+                highlightBoxes[zoneName].visible = false;
+                break;
+            }
+        }
+    }
+}
+
+// Function to handle mouse move
+function onDocumentMouseMove(event) {
+    event.preventDefault();
+
+    // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Update the raycaster with the camera and mouse position
+    raycaster.setFromCamera(mouse, camera);
+
+    // Calculate objects intersecting the picking ray
+    const intersects = raycaster.intersectObject(object, true);
+
+    if (intersects.length > 0) {
+        const intersectionPoint = intersects[0].point;
+
+        // Check if the intersection point is within any defined interactive zone
+        let isHovering = false;
+        for (const [zoneName, zone] of Object.entries(interactiveZones)) {
+            if (zone.containsPoint(intersectionPoint)) {
+                // Position and show the corresponding highlight box
+                const highlightBox = highlightBoxes[zoneName];
+                highlightBox.position.copy(zone.getCenter(new THREE.Vector3()));
+                highlightBox.scale.set(
+                    zone.max.x - zone.min.x,
+                    zone.max.y - zone.min.y,
+                    zone.max.z - zone.min.z
+                );
+                highlightBox.visible = true;
+                isHovering = true;
+            } else {
+                highlightBoxes[zoneName].visible = false;
+            }
+        }
+        if (isHovering) {
+            document.body.style.cursor = 'pointer'; // Change cursor to pointer
+        } else {
+            document.body.style.cursor = 'default'; // Reset cursor
+            Object.values(highlightBoxes).forEach(box => box.visible = false);
+        }
+    } else {
+        document.body.style.cursor = 'default'; // Reset cursor
+        Object.values(highlightBoxes).forEach(box => box.visible = false);
+    }
+}
+
 // Initialize scene
 function initScene() {
     modelLoader = document.querySelector('three-model-loader');
@@ -48,6 +155,9 @@ function initScene() {
     
     setupLights();
     setupControls();
+    createHighlightBox('tail', 0xff0000); // Red box for ollie
+    createHighlightBox('kickflip', 0x00ffff); // Light blue box for kickflip
+    createHighlightBox('360flip', 0x00ff00); // Green box for 360 flip
     loadModel();
     setupEventListeners();
 }
@@ -93,6 +203,12 @@ function loadModel() {
         object.scale.set(CONFIG.scale.x, CONFIG.scale.y, CONFIG.scale.z);
 
         container.add(object);
+
+        // Define the interactive zones after the model is loaded
+        const box = new THREE.Box3().setFromObject(object);
+        defineInteractiveZone('tail', new THREE.Vector3(box.min.x, box.min.y + 0.045, box.min.z + 0.03), new THREE.Vector3(box.min.x + 0.05, box.max.y, box.max.z - 0.03));
+        defineInteractiveZone('360flip', new THREE.Vector3(box.min.x + 0.025, box.min.y + 0.040, box.min.z + 0), new THREE.Vector3(box.min.x + 0.075, box.max.y, box.min.z + 0.03));
+        defineInteractiveZone('kickflip', new THREE.Vector3(box.max.x - 0.12, box.min.y + 0.035, box.min.z + 0.05), new THREE.Vector3(box.max.x - 0.05, box.max.y - 0.015, box.max.z));
     });
 }
 
@@ -218,15 +334,14 @@ function animateKickflip() {
 
             object.rotation.x = easedProgress * Math.PI * 2;
 
-            // slightly push the board down on right side like phase 2 of popThenFlick 
-            setTimeout(() => {
-                object.rotation.y = easedProgress * CONFIG.maxVerticalOffset;
-            }, 100);
+            // Remove the tilt effect
+            // object.rotation.y = easedProgress * CONFIG.maxVerticalOffset; // This line is removed
 
             if (progress < 1) {
                 requestAnimationFrame(rotate);
             } else {
                 isAnimating = false;
+                object.rotation.x = 0; // Ensure we end at 0
             }
         }
 
@@ -238,9 +353,11 @@ function animateKickflip() {
 // Event listeners
 function setupEventListeners() {
     window.addEventListener('resize', onWindowResize, false);
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
     document.getElementById('triggerElement360flip').addEventListener('click', animate360flip);
     document.getElementById('triggerElementKickflip').addEventListener('click', animateKickflip);
     document.getElementById('triggerElementOllie').addEventListener('click', animatePopThenFlick);
+    document.addEventListener('click', onDocumentMouseClick, false);
 }
 
 function onWindowResize() {
